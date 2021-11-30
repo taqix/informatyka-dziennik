@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <map>
+#include <sstream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -65,10 +68,10 @@ ostream &operator<<(ostream &os, const Przedmiot &przedmiot)
         cout << "Brak ocen!";
     else
     {
-        cout << "| ";
+
         for (float a : przedmiot.oceny)
         {
-            cout << a << " | ";
+            cout << a << " - ";
         }
         cout << "Srednia: " << przedmiot._suma / przedmiot.oceny.size();
     }
@@ -187,10 +190,10 @@ public:
     }
     void wyswietlUczniow()
     {
-        cout << "Lista uczniow klasy " + _nazwa + ": ";
+        cout << "Lista uczniow klasy " + _nazwa + ": " << endl;
         for (Uczen a : uczniowie)
         {
-            cout << a;
+            cout << a << endl;
         }
     }
     void zapiszKlase(string nazwa_pliku)
@@ -201,6 +204,33 @@ public:
         for (Uczen a : uczniowie)
             plik << a << endl;
         plik.close();
+    }
+    void zmianDoCSV(string nazwa_pliku)
+    {
+        const char sep=',';
+        string line,word;
+        ifstream in(nazwa_pliku);
+        if (!in)
+        {
+            cout << "Can't open file";
+            exit(0);
+        }
+        ofstream out("file.csv");
+        while (getline(in, line)) // get successive line of text
+        {
+            stringstream ss(line);
+            bool first = true;
+            while (ss >> word) // get successive words per line
+            {
+                if (!first)
+                    out << sep; // second and later words need a separator
+                out << word;
+                first = false;
+            }
+            out << '\n'; // end of line of output
+        }
+        in.close();
+        out.close();
     }
     friend ostream &operator<<(ostream &os, const Klasa &klasa);
 };
@@ -221,47 +251,32 @@ void Uczen::setKlasa(Klasa klasa)
 
 int main()
 {
-    do
-    {
-        cout << "Jaką operację chcesz wykonać? \n 1.Dodać ucznia \n 2. Utworzyć klase \n 3. Dodać przedmiot \n 4.Dodać oceny ucznia \n 5. Dodać Ucznia do Klasy \n 6. Wyświetlić oceny ucznia oraz średnią \n 7. Wyswietlic uczniow w klasie \n 8.Zapisac klase do pliku";
-        int n;
-        cin >> n;
-        switch (n)
-        {
-        case 1:
-        {
-            cout << "Wpisz imie i nazwisko ucznia oraz id";
-            string imie, nazwisko;
-            int id;
-            cin >> imie >> nazwisko >> id;
-            Uczen uczen1(imie, nazwisko, id);
-        }
-        break;
-        case 2:
-        {
-            cout << "Wpisz nazwe klasy";
-            string nazwa;
-            cin >> nazwa;
-            Klasa klasa1(nazwa);
-        }
-        break;
-        case 3:
-        {
-            cout << "Wpisz nazwe przedmiotu";
-            string naz;
-            cin >> naz;
-            Przedmiot przedmiot1(naz);
-            break;
-        }
-        case 4:
-        {
-
-            break;
-        }
-            
-        }
-
-    } while (true);
+    Klasa kl2p("2P");
+    Uczen tomasz("Tomasz", "Wilk", 27);
+    Uczen wiktor("Wiktor", "Lemanski", 12);
+    Uczen wojtus("Wojtek", "Bednarowski", 1);
+    Przedmiot infa("informatyka");
+    Przedmiot matematyka("matematyka");
+    kl2p.dodajUcznia(tomasz);
+    kl2p.dodajUcznia(wiktor);
+    kl2p.dodajUcznia(wojtus);
+    infa.dodajOcene(4);
+    matematyka.dodajOcene(3);
+    tomasz.dodajPrzedmiot(infa);
+    tomasz.dodajPrzedmiot(matematyka);
+    tomasz.pokazOceny();
+    infa.dodajOcene(6);
+    wiktor.dodajPrzedmiot(infa);
+    wiktor.dodajPrzedmiot(matematyka);
+    wiktor.pokazOceny();
+    matematyka.dodajOcene(2);
+    wojtus.dodajPrzedmiot(infa);
+    wojtus.dodajPrzedmiot(matematyka);
+    wojtus.pokazOceny();
+    cout << infa.sredniaOcen();
+    kl2p.wyswietlUczniow();
+    kl2p.zapiszKlase("isk.txt");
+    kl2p.zmianDoCSV("isk.txt");
 
     return 0;
 }
